@@ -1,11 +1,12 @@
 from types import IType
 
-INSTRUCTIONS = {
-    # RV32I — U/J
+
+INSTR_VALUES = {
+    # RV32I — U/J (type, opcode)
     "lui":   (IType.U, 0b0110111),
     "auipc": (IType.U, 0b0010111),
     "jal":   (IType.J, 0b1101111),
-    # RV32I — I
+    # RV32I — I (type, func3, opcode)
     "jalr":  (IType.I, 0b000, 0b1100111),
     "lb":    (IType.I, 0b000, 0b0000011),
     "lh":    (IType.I, 0b001, 0b0000011),
@@ -21,18 +22,18 @@ INSTRUCTIONS = {
     "slli":  (IType.I, 0b001, 0b0010011),
     "srli":  (IType.I, 0b101, 0b0010011),
     "srai":  (IType.I, 0b101, 0b0010011),
-    # RV32I — S
+    # RV32I — S (type, func3, opcode)
     "sb":    (IType.S, 0b000, 0b0100011),
     "sh":    (IType.S, 0b001, 0b0100011),
     "sw":    (IType.S, 0b010, 0b0100011),
-    # RV32I — B
+    # RV32I — B (type, func3, opcode)
     "beq":   (IType.B, 0b000, 0b1100011),
     "bne":   (IType.B, 0b001, 0b1100011),
     "blt":   (IType.B, 0b100, 0b1100011),
     "bge":   (IType.B, 0b101, 0b1100011),
     "bltu":  (IType.B, 0b110, 0b1100011),
     "bgeu":  (IType.B, 0b111, 0b1100011),
-    # RV32I — R
+    # RV32I — R (type, func7, func3, opcode)
     "add":   (IType.R, 0b0000000, 0b000, 0b0110011),
     "sub":   (IType.R, 0b0100000, 0b000, 0b0110011),
     "sll":   (IType.R, 0b0000000, 0b001, 0b0110011),
@@ -43,17 +44,14 @@ INSTRUCTIONS = {
     "sra":   (IType.R, 0b0100000, 0b101, 0b0110011),
     "or":    (IType.R, 0b0000000, 0b110, 0b0110011),
     "and":   (IType.R, 0b0000000, 0b111, 0b0110011),
-    # System ebreak/ecall (immediate for it because it's constant)
-    "ecall":  (IType.I, 0b000, 0b1110011, 0b000000000000),
-    "ebreak": (IType.I, 0b000, 0b1110011, 0b000000000001),
-    # Zicsr
-    "csrrw":  (IType.I, 0b001, 0b1110011),
-    "csrrs":  (IType.I, 0b010, 0b1110011),
-    "csrrc":  (IType.I, 0b011, 0b1110011),
-    "csrrwi": (IType.I, 0b101, 0b1110011),
-    "csrrsi": (IType.I, 0b110, 0b1110011),
-    "csrrci": (IType.I, 0b111, 0b1110011),
-    # RV32M
+    # Zicsr (type, func3, opcode)
+    "csrrw":  (IType.CSR, 0b001, 0b1110011),
+    "csrrs":  (IType.CSR, 0b010, 0b1110011),
+    "csrrc":  (IType.CSR, 0b011, 0b1110011),
+    "csrrwi": (IType.CSR, 0b101, 0b1110011),
+    "csrrsi": (IType.CSR, 0b110, 0b1110011),
+    "csrrci": (IType.CSR, 0b111, 0b1110011),
+    # RV32M (type, func7, func3, opcode)
     "mul":    (IType.R, 0b0000001, 0b000, 0b0110011),
     "mulh":   (IType.R, 0b0000001, 0b001, 0b0110011),
     "mulhsu": (IType.R, 0b0000001, 0b010, 0b0110011),
@@ -62,6 +60,43 @@ INSTRUCTIONS = {
     "divu":   (IType.R, 0b0000001, 0b101, 0b0110011),
     "rem":    (IType.R, 0b0000001, 0b110, 0b0110011),
     "remu":   (IType.R, 0b0000001, 0b111, 0b0110011),
-    # Machine-mode return
-    "mret":   (IType.R, 0b0111000, 0b000, 0b1110011),
+    # System ebreak/ecall/mret (type & full instructions because they constant)
+    "ecall":  (IType.SYS, 0b00000000000000000000000001110011),
+    "ebreak": (IType.SYS, 0b00000000000100000000000001110011),
+    "mret":   (IType.SYS, 0b00110000001000000000000001110011),
+}
+
+REGISTERS = {
+    "x0":  0b00000,
+    "x1":  0b00001,
+    "x2":  0b00010,
+    "x3":  0b00011,
+    "x4":  0b00100,
+    "x5":  0b00101,
+    "x6":  0b00110,
+    "x7":  0b00111,
+    "x8":  0b01000,
+    "x9":  0b01001,
+    "x10": 0b01010,
+    "x11": 0b01011,
+    "x12": 0b01100,
+    "x13": 0b01101,
+    "x14": 0b01110,
+    "x15": 0b01111,
+    "x16": 0b10000,
+    "x17": 0b10001,
+    "x18": 0b10010,
+    "x19": 0b10011,
+    "x20": 0b10100,
+    "x21": 0b10101,
+    "x22": 0b10110,
+    "x23": 0b10111,
+    "x24": 0b11000,
+    "x25": 0b11001,
+    "x26": 0b11010,
+    "x27": 0b11011,
+    "x28": 0b11100,
+    "x29": 0b11101,
+    "x30": 0b11110,
+    "x31": 0b11111,
 }
