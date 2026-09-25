@@ -51,7 +51,7 @@ INSTR_VALUES = {
     "csrrwi": (IType.CSR, 0b101, 0b1110011),
     "csrrsi": (IType.CSR, 0b110, 0b1110011),
     "csrrci": (IType.CSR, 0b111, 0b1110011),
-    # RV32M (type, func7, func3, opcode)
+    # RV32M — R (type, func7, func3, opcode)
     "mul":    (IType.R, 0b0000001, 0b000, 0b0110011),
     "mulh":   (IType.R, 0b0000001, 0b001, 0b0110011),
     "mulhsu": (IType.R, 0b0000001, 0b010, 0b0110011),
